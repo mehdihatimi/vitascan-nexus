@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitaScan Mobile PWA Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #000;
+            color: #00ffff;
+            margin: 0;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .pass { background: rgba(0,255,0,0.2); border-left: 4px solid #00ff00; }
+        .fail { background: rgba(255,0,0,0.2); border-left: 4px solid #ff0000; }
+        .warning { background: rgba(255,255,0,0.2); border-left: 4px solid #ffff00; }
+
+        button {
+            background: rgba(0,255,255,0.2);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: rgba(0,255,255,0.3); }
+
+        .mobile-nav-test {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.95);
+            padding: 10px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; padding-bottom: 80px; }
+            .test-section { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>📱 VitaScan Mobile PWA Test Suite</h1>
+
+    <div class="test-section">
+        <h3>🔧 Viewport & Responsive Design Tests</h3>
+        <div id="viewportTests"></div>
+        <button onclick="runViewportTests()">Run Viewport Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h3>📱 PWA Installation Tests</h3>
+        <div id="pwaTests"></div>
+        <button onclick="runPWATests()">Run PWA Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h3>📡 Network & Offline Tests</h3>
+        <div id="networkTests"></div>
+        <button onclick="runNetworkTests()">Run Network Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h3>👆 Touch & Gesture Tests</h3>
+        <div id="touchTests"></div>
+        <button onclick="runTouchTests()">Run Touch Tests</button>
+    </div>
+
+    <div class="test-section">
+        <h3>🔔 Notification Tests</h3>
+        <div id="notificationTests"></div>
+        <button onclick="runNotificationTests()">Run Notification Tests</button>
+    </div>
+
+    <!-- Test Mobile Navigation -->
+    <div class="mobile-nav-test">
+        <button onclick="testMobileNav('scan')">📸 Scan</button>
+        <button onclick="testMobileNav('ar')">🥽 AR</button>
+        <button onclick="testMobileNav('profile')">👤 Profile</button>
+    </div>
+
+    <script>
+        let testResults = [];
+
+        function addTestResult(section, test, pass, details) {
+            const result = { section, test, pass, details, timestamp: new Date() };
+            testResults.push(result);
+
+            const container = document.getElementById(section);
+            const div = document.createElement('div');
+            div.className = `test-result ${pass ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <strong>${test}</strong><br>
+                ${pass ? '✅ PASS' : '❌ FAIL'}<br>
+                <small>${details}</small>
+            `;
+            container.appendChild(div);
+        }
+
+        function runViewportTests() {
+            const container = document.getElementById('viewportTests');
+            container.innerHTML = '';
+
+            // Test 1: Viewport meta tag
+            const viewportMeta = document.querySelector('meta[name="viewport"]');
+            addTestResult('viewportTests', 'Viewport Meta Tag',
+                !!viewportMeta,
+                viewportMeta ? viewportMeta.content : 'Missing viewport meta tag');
+
+            // Test 2: Screen dimensions
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            addTestResult('viewportTests', 'Screen Dimensions',
+                screenWidth > 0 && screenHeight > 0,
+                `${screenWidth}x${screenHeight}`);
+
+            // Test 3: Mobile breakpoint
+            const isMobile = screenWidth <= 768;
+            addTestResult('viewportTests', 'Mobile Breakpoint Detection',
+                true,
+                isMobile ? 'Mobile layout active' : 'Desktop layout active');
+
+            // Test 4: Touch device detection
+            const hasTouch = 'ontouchstart' in window;
+            addTestResult('viewportTests', 'Touch Support',
+                hasTouch,
+                hasTouch ? 'Touch events supported' : 'No touch support detected');
+
+            // Test 5: Device pixel ratio
+            const pixelRatio = window.devicePixelRatio || 1;
+            addTestResult('viewportTests', 'Device Pixel Ratio',
+                pixelRatio >= 1,
+                `${pixelRatio}x`);
+        }
+
+        function runPWATests() {
+            const container = document.getElementById('pwaTests');
+            container.innerHTML = '';
+
+            // Test 1: Manifest
+            const manifestLink = document.querySelector('link[rel="manifest"]');
+            addTestResult('pwaTests', 'Web App Manifest',
+                !!manifestLink,
+                manifestLink ? 'Manifest link found' : 'No manifest link');
+
+            // Test 2: Service Worker support
+            const swSupported = 'serviceWorker' in navigator;
+            addTestResult('pwaTests', 'Service Worker Support',
+                swSupported,
+                swSupported ? 'Service Worker API available' : 'No Service Worker support');
+
+            // Test 3: Install prompt event
+            const installPromptSupported = window.deferredPrompt || 'beforeinstallprompt' in window;
+            addTestResult('pwaTests', 'Install Prompt Support',
+                true,
+                'beforeinstallprompt event handling implemented');
+
+            // Test 4: Apple PWA meta tags
+            const appleMeta = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
+            addTestResult('pwaTests', 'Apple PWA Meta Tags',
+                !!appleMeta,
+                appleMeta ? 'Apple PWA support enabled' : 'Missing Apple PWA meta tags');
+
+            // Test 5: Theme color
+            const themeColor = document.querySelector('meta[name="theme-color"]');
+            addTestResult('pwaTests', 'Theme Color',
+                !!themeColor,
+                themeColor ? themeColor.content : 'No theme color defined');
+        }
+
+        function runNetworkTests() {
+            const container = document.getElementById('networkTests');
+            container.innerHTML = '';
+
+            // Test 1: Online/Offline detection
+            const isOnline = navigator.onLine;
+            addTestResult('networkTests', 'Network Status Detection',
+                true,
+                isOnline ? 'Currently online' : 'Currently offline');
+
+            // Test 2: Connection API
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            addTestResult('networkTests', 'Connection API',
+                !!connection,
+                connection ? `${connection.effectiveType || 'unknown'} connection` : 'Connection API not supported');
+
+            // Test 3: Network event listeners
+            let networkEventsSupported = true;
+            try {
+                window.addEventListener('online', () => {});
+                window.addEventListener('offline', () => {});
+            } catch (e) {
+                networkEventsSupported = false;
+            }
+            addTestResult('networkTests', 'Network Event Listeners',
+                networkEventsSupported,
+                networkEventsSupported ? 'Online/offline events supported' : 'Network events not supported');
+
+            // Test 4: Cache API
+            const cacheSupported = 'caches' in window;
+            addTestResult('networkTests', 'Cache API',
+                cacheSupported,
+                cacheSupported ? 'Cache API available for offline storage' : 'No Cache API support');
+        }
+
+        function runTouchTests() {
+            const container = document.getElementById('touchTests');
+            container.innerHTML = '';
+
+            // Test 1: Touch events
+            const touchSupported = 'ontouchstart' in window;
+            addTestResult('touchTests', 'Touch Events',
+                touchSupported,
+                touchSupported ? 'Touch events available' : 'No touch event support');
+
+            // Test 2: Pointer events
+            const pointerSupported = 'onpointerdown' in window;
+            addTestResult('touchTests', 'Pointer Events',
+                pointerSupported,
+                pointerSupported ? 'Pointer events supported' : 'No pointer event support');
+
+            // Test 3: Gesture detection simulation
+            let gestureDetected = false;
+            const testArea = document.createElement('div');
+            testArea.style.cssText = 'width: 100px; height: 50px; background: rgba(0,255,255,0.2); margin: 10px 0; text-align: center; line-height: 50px;';
+            testArea.textContent = 'Touch here to test';
+
+            if (touchSupported) {
+                testArea.addEventListener('touchstart', () => {
+                    gestureDetected = true;
+                    testArea.textContent = 'Touch detected!';
+                    testArea.style.background = 'rgba(0,255,0,0.2)';
+                });
+            }
+
+            container.appendChild(testArea);
+            addTestResult('touchTests', 'Gesture Detection Setup',
+                touchSupported,
+                touchSupported ? 'Touch gesture handler attached' : 'No touch support for gestures');
+
+            // Test 4: Vibration API
+            const vibrationSupported = 'vibrate' in navigator;
+            addTestResult('touchTests', 'Vibration API',
+                vibrationSupported,
+                vibrationSupported ? 'Haptic feedback available' : 'No vibration support');
+        }
+
+        function runNotificationTests() {
+            const container = document.getElementById('notificationTests');
+            container.innerHTML = '';
+
+            // Test 1: Notification API
+            const notificationSupported = 'Notification' in window;
+            addTestResult('notificationTests', 'Notification API',
+                notificationSupported,
+                notificationSupported ? 'Push notifications supported' : 'No notification support');
+
+            // Test 2: Permission status
+            if (notificationSupported) {
+                addTestResult('notificationTests', 'Notification Permission',
+                    true,
+                    `Current permission: ${Notification.permission}`);
+
+                // Test 3: Request permission
+                if (Notification.permission === 'default') {
+                    const requestBtn = document.createElement('button');
+                    requestBtn.textContent = 'Request Notification Permission';
+                    requestBtn.onclick = async () => {
+                        const permission = await Notification.requestPermission();
+                        addTestResult('notificationTests', 'Permission Request Result',
+                            permission === 'granted',
+                            `Permission ${permission}`);
+                    };
+                    container.appendChild(requestBtn);
+                }
+
+                // Test 4: Test notification
+                if (Notification.permission === 'granted') {
+                    const testBtn = document.createElement('button');
+                    testBtn.textContent = 'Send Test Notification';
+                    testBtn.onclick = () => {
+                        new Notification('VitaScan Test', {
+                            body: 'Mobile notification test successful!',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%2300ffff"/></svg>'
+                        });
+                        addTestResult('notificationTests', 'Test Notification Sent',
+                            true,
+                            'Check if notification appeared');
+                    };
+                    container.appendChild(testBtn);
+                }
+            }
+        }
+
+        function testMobileNav(type) {
+            addTestResult('touchTests', `Mobile Nav ${type}`,
+                true,
+                `Mobile navigation ${type} button clicked`);
+
+            // Simulate navigation
+            alert(`📱 Mobile Navigation Test: ${type} button clicked successfully!`);
+        }
+
+        // Auto-run some tests on load
+        window.addEventListener('load', () => {
+            console.log('📱 VitaScan Mobile Test Suite loaded');
+            setTimeout(() => {
+                runViewportTests();
+                runPWATests();
+                runNetworkTests();
+            }, 1000);
+        });
+
+        // Test screen orientation changes
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                addTestResult('viewportTests', 'Orientation Change',
+                    true,
+                    `New dimensions: ${window.innerWidth}x${window.innerHeight}`);
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VitaScan Translation Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #00ffff; }
+        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; }
+        .pass { border-color: #00ff00; background: rgba(0,255,0,0.1); }
+        .fail { border-color: #ff0000; background: rgba(255,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <h1>🌐 VitaScan Translation System Test</h1>
+
+    <div id="testResults"></div>
+
+    <script>
+        // Test translation data structure
+        const translations = {
+            en: {
+                'logo-main': 'VitaScan Nexus',
+                'logo-tagline': "World's #1 AI Wellness Intelligence",
+                'health-profile': '🧬 VitaScan Health Profile'
+            },
+            es: {
+                'logo-main': 'VitaScan Nexus',
+                'logo-tagline': 'Inteligencia de Bienestar IA #1 del Mundo',
+                'health-profile': '🧬 Perfil de Salud VitaScan'
+            },
+            fr: {
+                'logo-main': 'VitaScan Nexus',
+                'logo-tagline': 'Intelligence IA Bien-être #1 Mondiale',
+                'health-profile': '🧬 Profil Santé VitaScan'
+            }
+        };
+
+        function runTranslationTests() {
+            const results = [];
+
+            // Test 1: Translation object structure
+            results.push({
+                test: "Translation object exists",
+                pass: typeof translations === 'object' && translations !== null,
+                details: `Found ${Object.keys(translations).length} languages`
+            });
+
+            // Test 2: Required languages present
+            const requiredLangs = ['en', 'es', 'fr', 'de', 'zh'];
+            requiredLangs.forEach(lang => {
+                results.push({
+                    test: `Language ${lang} exists`,
+                    pass: translations.hasOwnProperty(lang),
+                    details: translations.hasOwnProperty(lang) ? '✅' : '❌ Missing'
+                });
+            });
+
+            // Test 3: Key consistency across languages
+            const baseKeys = Object.keys(translations.en || {});
+            Object.keys(translations).forEach(lang => {
+                if (lang !== 'en') {
+                    const langKeys = Object.keys(translations[lang] || {});
+                    const missingKeys = baseKeys.filter(key => !langKeys.includes(key));
+                    results.push({
+                        test: `${lang} has all translation keys`,
+                        pass: missingKeys.length === 0,
+                        details: missingKeys.length === 0 ? '✅ All keys present' : `❌ Missing: ${missingKeys.join(', ')}`
+                    });
+                }
+            });
+
+            // Test 4: Translation function simulation
+            function changeLanguage(lang) {
+                return translations[lang] || translations.en;
+            }
+
+            results.push({
+                test: "Language switching function",
+                pass: changeLanguage('es')['logo-tagline'].includes('Inteligencia'),
+                details: "Spanish translation correctly applied"
+            });
+
+            return results;
+        }
+
+        // Run tests and display results
+        const testResults = runTranslationTests();
+        const resultsContainer = document.getElementById('testResults');
+
+        testResults.forEach(result => {
+            const div = document.createElement('div');
+            div.className = `test-result ${result.pass ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <strong>${result.test}</strong><br>
+                ${result.pass ? '✅ PASS' : '❌ FAIL'}<br>
+                <small>${result.details}</small>
+            `;
+            resultsContainer.appendChild(div);
+        });
+
+        console.log('🌐 Translation tests completed');
+    </script>
+</body>
+</html>

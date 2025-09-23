@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Circle Debug</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #000000;
+            color: #00ffff;
+            font-family: Arial, sans-serif;
+        }
+
+        .test-section {
+            border: 1px solid #00ffff;
+            margin: 20px 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Copy the suspicious CSS one by one to test */
+        .logo-main {
+            font-size: 2.2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: #00ffff;
+            text-shadow: 0 0 30px rgba(0,255,255,0.5);
+            animation: logoGlow 4s ease-in-out infinite alternate;
+            margin-bottom: 10px;
+        }
+
+        @keyframes logoGlow {
+            0% {
+                filter: drop-shadow(0 0 10px #00ffff) drop-shadow(0 0 20px #ff00ff);
+                transform: scale(1);
+            }
+            100% {
+                filter: drop-shadow(0 0 20px #ff00ff) drop-shadow(0 0 30px #00ffff);
+                transform: scale(1.02);
+            }
+        }
+
+        .brand-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .test-starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            overflow: hidden;
+        }
+
+        .test-food-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(135deg, #000000, #111111, #000000);
+        }
+
+        .test-gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: -1;
+            animation: nebulaPulse 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes nebulaPulse {
+            0% { opacity: 0.2; }
+            100% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Black Circle Debug Test</h1>
+
+    <div class="test-section">
+        <h3>Test 1: Logo Only</h3>
+        <div class="brand-logo">
+            <div class="logo-main">VitaScan Nexus</div>
+        </div>
+        <p>If you see a black circle here, it's coming from the logo CSS.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 2: Background Elements</h3>
+        <div class="test-starfield" id="testStarfield"></div>
+        <div class="test-food-bg"></div>
+        <div class="test-gradient-overlay"></div>
+        <p>Testing background layers...</p>
+    </div>
+
+    <div class="test-section">
+        <h3>Test 3: Plain Text</h3>
+        <p>This is just plain text to see if the circle appears anywhere.</p>
+    </div>
+
+    <script>
+        // Test if the starfield creation creates a black circle
+        function createTestStarfield() {
+            const starfield = document.getElementById('testStarfield');
+            for (let i = 0; i < 10; i++) {
+                const star = document.createElement('div');
+                star.style.cssText = `
+                    position: absolute;
+                    background: white;
+                    border-radius: 50%;
+                    width: 2px;
+                    height: 2px;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                `;
+                starfield.appendChild(star);
+            }
+        }
+
+        createTestStarfield();
+        console.log('🔍 Debug page loaded - check for black circles');
+    </script>
+</body>
+</html>

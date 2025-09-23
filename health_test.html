@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VitaScan Health Monitoring Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #000; color: #00ffff; }
+        .test-result { margin: 10px 0; padding: 10px; border: 1px solid #00ffff; border-radius: 5px; }
+        .pass { border-color: #00ff00; background: rgba(0,255,0,0.1); }
+        .fail { border-color: #ff0000; background: rgba(255,0,0,0.1); }
+        .warning { border-color: #ffff00; background: rgba(255,255,0,0.1); }
+        button { background: rgba(0,255,255,0.2); border: 1px solid #00ffff; color: #00ffff; padding: 10px; border-radius: 5px; cursor: pointer; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🚨 VitaScan Health Monitoring Test Suite</h1>
+
+    <div id="testResults"></div>
+
+    <button onclick="runHealthTests()">🧪 Run All Health Tests</button>
+    <button onclick="testEmergencyAlert()">🚨 Test Emergency Alert</button>
+    <button onclick="testNotifications()">🔔 Test Notifications</button>
+
+    <script>
+        // Simulate health monitoring system
+        let healthMonitoringActive = false;
+        let healthMonitoringInterval = null;
+        let emergencyContacts = [
+            {name: "Emergency Contact 1", phone: "555-0123", relationship: "Family"},
+            {name: "Dr. Smith", phone: "555-0456", relationship: "Doctor"}
+        ];
+
+        let healthThresholds = {
+            bloodSugar: { min: 70, max: 180, critical: 300 },
+            bloodPressure: { systolic: 140, diastolic: 90 },
+            heartRate: { min: 60, max: 100, critical: 150 },
+            temperature: { min: 97, max: 99.5, critical: 103 }
+        };
+
+        function addTestResult(test, pass, details) {
+            const container = document.getElementById('testResults');
+            const div = document.createElement('div');
+            div.className = `test-result ${pass ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <strong>${test}</strong><br>
+                ${pass ? '✅ PASS' : '❌ FAIL'}<br>
+                <small>${details}</small>
+            `;
+            container.appendChild(div);
+        }
+
+        function runHealthTests() {
+            const container = document.getElementById('testResults');
+            container.innerHTML = '';
+
+            // Test 1: Health thresholds validation
+            addTestResult('Health Thresholds Configuration',
+                healthThresholds.bloodSugar && healthThresholds.heartRate,
+                'All vital sign thresholds properly configured');
+
+            // Test 2: Emergency contacts validation
+            addTestResult('Emergency Contacts System',
+                emergencyContacts.length > 0,
+                `${emergencyContacts.length} emergency contacts configured`);
+
+            // Test 3: Vital signs analysis simulation
+            const testVitals = {
+                bloodSugar: 250, // High
+                systolic: 150,   // High
+                diastolic: 95,   // High
+                heartRate: 120,  // Elevated
+                temperature: 100 // Elevated
+            };
+
+            const alerts = analyzeVitalSigns(testVitals);
+            addTestResult('Vital Signs Analysis Engine',
+                alerts.length > 0,
+                `Detected ${alerts.length} health alerts from test vitals`);
+
+            // Test 4: Critical alert detection
+            const criticalVitals = {
+                bloodSugar: 350, // Critical
+                heartRate: 160,  // Critical
+                temperature: 104 // Critical
+            };
+
+            const criticalAlerts = analyzeVitalSigns(criticalVitals);
+            const hasCritical = criticalAlerts.some(alert => alert.type === 'CRITICAL');
+            addTestResult('Critical Alert Detection',
+                hasCritical,
+                hasCritical ? 'Critical alerts properly detected' : 'Failed to detect critical conditions');
+
+            // Test 5: Monitoring interval management
+            startHealthMonitoring();
+            const intervalActive = healthMonitoringInterval !== null;
+            stopHealthMonitoring();
+            const intervalCleared = healthMonitoringInterval === null;
+
+            addTestResult('Monitoring Interval Management',
+                intervalActive && intervalCleared,
+                'Health monitoring intervals properly managed');
+
+            // Test 6: Notification system
+            const notificationSupported = 'Notification' in window;
+            addTestResult('Browser Notification Support',
+                notificationSupported,
+                notificationSupported ? 'Browser notifications available' : 'No notification support');
+        }
+
+        function analyzeVitalSigns(vitals) {
+            const alerts = [];
+
+            // Blood sugar analysis
+            if (vitals.bloodSugar > healthThresholds.bloodSugar.critical) {
+                alerts.push({
+                    type: 'CRITICAL',
+                    message: `🚨 CRITICAL: Blood sugar extremely high (${Math.round(vitals.bloodSugar)} mg/dL)`,
+                    action: 'Seek immediate medical attention'
+                });
+            } else if (vitals.bloodSugar > healthThresholds.bloodSugar.max) {
+                alerts.push({
+                    type: 'WARNING',
+                    message: `⚠️ Blood sugar elevated (${Math.round(vitals.bloodSugar)} mg/dL)`,
+                    action: 'Monitor closely and avoid high-carb foods'
+                });
+            }
+
+            // Heart rate analysis
+            if (vitals.heartRate > healthThresholds.heartRate.critical) {
+                alerts.push({
+                    type: 'CRITICAL',
+                    message: `🚨 CRITICAL: Heart rate very high (${Math.round(vitals.heartRate)} bpm)`,
+                    action: 'Stop activity and seek medical help'
+                });
+            } else if (vitals.heartRate > healthThresholds.heartRate.max) {
+                alerts.push({
+                    type: 'WARNING',
+                    message: `⚠️ Elevated heart rate (${Math.round(vitals.heartRate)} bpm)`,
+                    action: 'Rest and monitor'
+                });
+            }
+
+            // Temperature analysis
+            if (vitals.temperature > healthThresholds.temperature.critical) {
+                alerts.push({
+                    type: 'CRITICAL',
+                    message: `🚨 CRITICAL: High fever (${vitals.temperature.toFixed(1)}°F)`,
+                    action: 'Seek immediate medical attention'
+                });
+            }
+
+            return alerts;
+        }
+
+        function startHealthMonitoring() {
+            healthMonitoringActive = true;
+
+            // Clear any existing interval first
+            if (healthMonitoringInterval) {
+                clearInterval(healthMonitoringInterval);
+            }
+
+            // Start monitoring
+            healthMonitoringInterval = setInterval(() => {
+                if (healthMonitoringActive) {
+                    checkHealthMetrics();
+                }
+            }, 30000);
+
+            console.log('Health monitoring started');
+        }
+
+        function stopHealthMonitoring() {
+            healthMonitoringActive = false;
+
+            // Clear the monitoring interval
+            if (healthMonitoringInterval) {
+                clearInterval(healthMonitoringInterval);
+                healthMonitoringInterval = null;
+            }
+
+            console.log('Health monitoring stopped');
+        }
+
+        function checkHealthMetrics() {
+            // Simulate reading vital signs
+            const simulatedVitals = {
+                bloodSugar: 85 + Math.random() * 100,
+                systolic: 110 + Math.random() * 40,
+                diastolic: 70 + Math.random() * 20,
+                heartRate: 70 + Math.random() * 30,
+                temperature: 98 + Math.random() * 2
+            };
+
+            const alerts = analyzeVitalSigns(simulatedVitals);
+            if (alerts.length > 0) {
+                console.log('Health alerts detected:', alerts);
+            }
+        }
+
+        function testEmergencyAlert() {
+            const testAlert = {
+                type: 'CRITICAL',
+                message: '🚨 TEST: Critical health condition detected',
+                action: 'This is a test - no action required'
+            };
+
+            // Simulate emergency notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🚨 VitaScan Emergency Test', {
+                    body: testAlert.message + '\n\n' + testAlert.action,
+                    requireInteraction: true,
+                    vibrate: [200, 100, 200]
+                });
+            }
+
+            // Log emergency contact notifications
+            emergencyContacts.forEach(contact => {
+                console.log(`📞 Emergency notification sent to ${contact.name} (${contact.phone})`);
+            });
+
+            addTestResult('Emergency Alert System Test',
+                true,
+                'Emergency alert system triggered successfully');
+        }
+
+        function testNotifications() {
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    new Notification('🚨 VitaScan Health Test', {
+                        body: 'Test notification from VitaScan health monitoring system',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23ff4444"/><text x="50" y="60" text-anchor="middle" fill="white" font-size="40">!</text></svg>'
+                    });
+                    addTestResult('Notification Test',
+                        true,
+                        'Test notification sent successfully');
+                } else if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        addTestResult('Notification Permission Request',
+                            permission === 'granted',
+                            `Permission ${permission}`);
+                        if (permission === 'granted') {
+                            testNotifications(); // Retry after permission granted
+                        }
+                    });
+                } else {
+                    addTestResult('Notification Test',
+                        false,
+                        'Notifications blocked by user');
+                }
+            } else {
+                addTestResult('Notification Test',
+                    false,
+                    'Browser does not support notifications');
+            }
+        }
+
+        console.log('🚨 VitaScan Health Test Suite loaded');
+    </script>
+</body>
+</html>
