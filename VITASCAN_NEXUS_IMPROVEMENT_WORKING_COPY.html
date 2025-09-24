@@ -731,10 +731,12 @@
 
         /* Beautiful Loading Animation for Capture Button */
         .capture-loading {
-            background: linear-gradient(45deg, #00ffff, #0088cc) !important;
-            animation: captureButtonPulse 1.5s infinite ease-in-out;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff0080) !important;
+            animation: captureButtonPulse 1.2s infinite ease-in-out;
             pointer-events: none;
             position: relative;
+            transform: scale(1.1) !important;
+            box-shadow: 0 0 25px rgba(255,0,255,0.8) !important;
         }
 
         .capture-loading::before {
@@ -742,13 +744,14 @@
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid rgba(0,0,0,0.3);
-            border-top: 2px solid #000;
+            width: 24px;
+            height: 24px;
+            margin: -12px 0 0 -12px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid #fff;
             border-radius: 50%;
-            animation: captureSpinner 1s linear infinite;
+            animation: captureSpinner 0.8s linear infinite;
+            z-index: 2;
         }
 
         .capture-loading::after {
@@ -760,10 +763,11 @@
             height: 100%;
             background: linear-gradient(90deg,
                 transparent,
-                rgba(255,255,255,0.4),
+                rgba(255,255,255,0.6),
                 transparent
             );
-            animation: captureShimmer 2s infinite;
+            animation: captureShimmer 1.5s infinite;
+            z-index: 1;
         }
 
         @keyframes captureButtonPulse {
@@ -4327,6 +4331,13 @@
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
+                // Add loading animation to upload button
+                const uploadLabel = document.querySelector('.file-label');
+                if (uploadLabel) {
+                    uploadLabel.classList.add('capture-loading');
+                    uploadLabel.innerHTML = '🔬 Analyzing...';
+                }
+
                 // Show beautiful loading state for main scanner
                 showMainLoadingAnimation();
 
@@ -4359,7 +4370,13 @@
                     setTimeout(() => {
                         analyzeImageWithWorldClassAI(canvas);
                         hideMainLoadingAnimation();
-                    }, 600);
+
+                        // Restore upload button
+                        if (uploadLabel) {
+                            uploadLabel.classList.remove('capture-loading');
+                            uploadLabel.innerHTML = '📁 Upload Image';
+                        }
+                    }, 1200); // Longer delay to see the beautiful animation
                 };
 
                 img.src = URL.createObjectURL(file);
