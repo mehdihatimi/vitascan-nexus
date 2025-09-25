@@ -5680,22 +5680,58 @@
             }
         }
 
-        function startCamera() {
-            navigator.mediaDevices.getUserMedia({ video: true })
+        // Global camera variables
+        let currentStream = null;
+        let currentCamera = 'environment'; // 'user' for front, 'environment' for back
+        let cameraVideo = null;
+        let captureBtn = null;
+        let switchBtn = null;
+
+        function startCamera(facingMode = 'environment') {
+            // Stop existing stream if any
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            // Remove existing elements
+            if (cameraVideo) cameraVideo.remove();
+            if (captureBtn) captureBtn.remove();
+            if (switchBtn) switchBtn.remove();
+
+            const constraints = {
+                video: {
+                    facingMode: facingMode,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            };
+
+            navigator.mediaDevices.getUserMedia(constraints)
                 .then(stream => {
-                    const video = document.createElement('video');
-                    video.srcObject = stream;
-                    video.autoplay = true;
-                    video.style.maxWidth = '400px';
-                    video.style.borderRadius = '15px';
-                    video.style.margin = '15px 0';
-                    video.style.border = '3px solid #00ffff';
-                    video.style.boxShadow = '0 0 30px rgba(0,255,255,0.5)';
+                    currentStream = stream;
+                    currentCamera = facingMode;
+
+                    cameraVideo = document.createElement('video');
+                    cameraVideo.srcObject = stream;
+                    cameraVideo.autoplay = true;
+                    cameraVideo.style.maxWidth = '400px';
+                    cameraVideo.style.borderRadius = '15px';
+                    cameraVideo.style.margin = '15px 0';
+                    cameraVideo.style.border = '3px solid #00ffff';
+                    cameraVideo.style.boxShadow = '0 0 30px rgba(0,255,255,0.5)';
 
                     const canvas = document.getElementById('imageCanvas');
-                    canvas.parentNode.insertBefore(video, canvas);
+                    canvas.parentNode.insertBefore(cameraVideo, canvas);
 
-                    const captureBtn = document.createElement('button');
+                    // Create camera controls container
+                    const controlsContainer = document.createElement('div');
+                    controlsContainer.style.display = 'flex';
+                    controlsContainer.style.gap = '10px';
+                    controlsContainer.style.justifyContent = 'center';
+                    controlsContainer.style.margin = '10px 0';
+
+                    // Create capture button
+                    captureBtn = document.createElement('button');
                     captureBtn.textContent = '📸 Capture & Analyze';
                     captureBtn.className = 'mobile-camera-btn';
                     captureBtn.onclick = () => {
@@ -5708,20 +5744,36 @@
                             const canvas = document.getElementById('imageCanvas');
                             const ctx = canvas.getContext('2d');
 
-                            canvas.width = video.videoWidth;
-                            canvas.height = video.videoHeight;
-                            ctx.drawImage(video, 0, 0);
+                            canvas.width = cameraVideo.videoWidth;
+                            canvas.height = cameraVideo.videoHeight;
+                            ctx.drawImage(cameraVideo, 0, 0);
                             canvas.style.display = 'block';
 
                             analyzeImageWithWorldClassAI(canvas);
 
-                            stream.getTracks().forEach(track => track.stop());
-                            video.remove();
-                            captureBtn.remove();
+                            // Clean up
+                            currentStream.getTracks().forEach(track => track.stop());
+                            cameraVideo.remove();
+                            controlsContainer.remove();
                         }, 500); // 500ms delay to show the beautiful animation
                     };
 
-                    video.parentNode.insertBefore(captureBtn, video.nextSibling);
+                    // Create camera switch button
+                    switchBtn = document.createElement('button');
+                    switchBtn.textContent = currentCamera === 'environment' ? '🤳 Front Camera' : '📷 Back Camera';
+                    switchBtn.className = 'mobile-camera-btn';
+                    switchBtn.style.background = 'rgba(255,140,0,0.8)';
+                    switchBtn.onclick = () => {
+                        const newFacingMode = currentCamera === 'environment' ? 'user' : 'environment';
+                        startCamera(newFacingMode);
+                    };
+
+                    // Add buttons to container
+                    controlsContainer.appendChild(captureBtn);
+                    controlsContainer.appendChild(switchBtn);
+
+                    // Insert controls after video
+                    cameraVideo.parentNode.insertBefore(controlsContainer, cameraVideo.nextSibling);
                 })
                 .catch(err => {
                     alert('Camera access denied. Please use file upload instead.');
