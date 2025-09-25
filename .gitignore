@@ -1,5 +1,51 @@
-# https://git-scm.com/docs/gitignore
-# https://help.github.com/articles/ignoring-files
-# Example .gitignore files: https://github.com/github/gitignore
-/bower_components/
-/node_modules/
+# System Files
+.cache/
+.gemini/
+.gitconfig
+.ipynb_checkpoints/
+.ipython/
+.jupyter/
+.lesshst
+.python_history
+AppData/
+"Application Data"
+Contacts/
+Cookies
+CrossDevice/
+Desktop/
+Documents/
+Downloads/
+Favorites/
+Links/
+"Local Settings"
+Music/
+"My Documents"
+NTUSER.*
+NetHood
+OneDrive/
+PrintHood
+PycharmProjects/
+Recent
+"Saved Games/"
+Searches/
+SendTo
+"Start Menu"
+Templates
+Videos/
+ntuser.*
+*.ipynb
+
+# Other Projects
+ai-lawyer-*
+nexus-*
+commandlinetest/
+feedback-analyzer-chatbot/
+openai_assignment/
+
+# Backup Files  
+*_BACKUP*
+*_ORIGINAL*
+PHASE_*
+
+# Build Files
+*.tar.gz
